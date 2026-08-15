@@ -1,0 +1,28 @@
+{
+  "name": "acme",
+  "private": true,
+  "type": "module",
+  "packageManager": "pnpm@11.8.0",
+  "engines": {
+    "node": ">=24"
+  },
+  "scripts": {
+    "setup": "node scripts/setup.mjs",
+    "dev": "turbo run dev",
+    "build": "turbo run build",
+    "lint": "turbo run lint",
+    "typecheck": "turbo run typecheck",
+    "db:generate": "turbo run db:generate",
+    "db:migrate": "turbo run db:migrate",
+    "db:studio": "turbo run db:studio",
+    "db:seed": "turbo run db:seed",
+    "infra:up": "docker compose --env-file apps/web/.env up -d",
+    "infra:down": "docker compose --env-file apps/web/.env down",
+    "deploy": "node scripts/deploy.mjs"
+  },
+  "devDependencies": {
+    "prettier": "^3.9.6",
+    "turbo": "^2.9.18",
+    "typescript": "^6.0.3"
+  }
+}

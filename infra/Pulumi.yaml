@@ -1,0 +1,6 @@
+name: acme
+runtime:
+  name: nodejs
+  options:
+    packagemanager: pnpm
+description: Infrastructure Scaleway de l'application (Serverless Containers, PostgreSQL, Object Storage).

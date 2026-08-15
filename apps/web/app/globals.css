@@ -1,0 +1,34 @@
+@import "tailwindcss";
+@import "@acme/ui/theme.css";
+
+/* Le design system est livré en source : Tailwind doit scanner ses classes. */
+@source "../../../packages/ui/src";
+
+@layer base {
+  html {
+    -webkit-text-size-adjust: 100%;
+    /* Empêche le rebond de la page derrière le chat en mode standalone. */
+    overscroll-behavior-y: none;
+  }
+
+  body {
+    background-color: var(--color-surface);
+    color: var(--color-ink);
+    font-family: var(--font-sans);
+    -webkit-font-smoothing: antialiased;
+  }
+
+  /* iOS zoome sur un champ dont la taille de police est inférieure à 16 px. */
+  input,
+  textarea,
+  select {
+    font-size: 16px;
+  }
+}
+
+@utility no-scrollbar {
+  scrollbar-width: none;
+  &::-webkit-scrollbar {
+    display: none;
+  }
+}

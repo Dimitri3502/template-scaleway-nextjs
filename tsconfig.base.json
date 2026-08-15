@@ -1,0 +1,33 @@
+{
+  "$schema": "https://json.schemastore.org/tsconfig",
+  "compilerOptions": {
+    "target": "ES2024",
+    "lib": ["ES2024"],
+    "module": "ESNext",
+    "moduleResolution": "Bundler",
+    "moduleDetection": "force",
+    "resolveJsonModule": true,
+    "verbatimModuleSyntax": true,
+    "isolatedModules": true,
+    "esModuleInterop": true,
+    "skipLibCheck": true,
+    "strict": true,
+    "noUncheckedIndexedAccess": true,
+    "exactOptionalPropertyTypes": true,
+    "noImplicitOverride": true,
+    "noFallthroughCasesInSwitch": true,
+    "noUnusedLocals": true,
+    "noUnusedParameters": true,
+    "noEmit": true,
+    "paths": {
+      "@acme/shared": ["./packages/shared/src/index.ts"],
+      "@acme/shared/*": ["./packages/shared/src/*"],
+      "@acme/db": ["./packages/db/src/index.ts"],
+      "@acme/db/*": ["./packages/db/src/*"],
+      "@acme/ui": ["./packages/ui/src/index.ts"],
+      "@acme/ui/*": ["./packages/ui/src/*"],
+      "@acme/storage": ["./packages/storage/src/index.ts"],
+      "@acme/storage/*": ["./packages/storage/src/*"]
+    }
+  }
+}

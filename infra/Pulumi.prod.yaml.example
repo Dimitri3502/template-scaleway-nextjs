@@ -1,0 +1,20 @@
+# Copiez ce fichier vers Pulumi.prod.yaml, puis renseignez les valeurs avec la CLI :
+#
+#   cd infra
+#   pulumi stack init prod
+#   pulumi config set clerkPublishableKey pk_live_xxx
+#   pulumi config set --secret clerkSecretKey sk_live_xxx
+#   pulumi config set adminCidr "$(curl -s https://ifconfig.me)/32"
+#
+# `pulumi config set --secret` chiffre la valeur : le fichier peut être versionné tel quel.
+# Ne recopiez jamais un secret en clair ici.
+config:
+  acme:region: fr-par
+  acme:zone: fr-par-1
+  acme:dbNodeType: DB-DEV-S
+  acme:minScale: "1"
+  acme:maxScale: "3"
+  acme:clerkPublishableKey: pk_test_xxxxxxxxxxxxxxxxxxxxxxxxxxxx
+  # acme:adminCidr: 203.0.113.4/32
+  # acme:clerkSecretKey: (chiffré par `pulumi config set --secret`)
+  # acme:imageTag: (écrit automatiquement par `pnpm deploy`)

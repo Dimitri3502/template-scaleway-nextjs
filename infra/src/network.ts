@@ -1,0 +1,13 @@
+import * as scaleway from "@pulumiverse/scaleway";
+
+import { resourceName, settings } from "./config";
+
+/**
+ * Réseau privé régional : c'est par là que le conteneur joint PostgreSQL. La base n'a
+ * donc pas besoin d'être exposée à Internet pour que l'application fonctionne.
+ */
+export const privateNetwork = new scaleway.network.PrivateNetwork("private-network", {
+  name: resourceName("vpc"),
+  region: settings.region,
+  isRegional: true,
+});

@@ -1,0 +1,16 @@
+packages:
+  - "apps/*"
+  - "packages/*"
+  - "packages/config/*"
+  - "infra"
+
+allowBuilds:
+  esbuild: true
+  # Requis par le client gRPC de Pulumi.
+  protobufjs: true
+  sharp: true
+  unrs-resolver: true
+
+minimumReleaseAgeExclude:
+  - '@clerk/localizations@4.15.3'
+  - '@clerk/shared@4.29.1'

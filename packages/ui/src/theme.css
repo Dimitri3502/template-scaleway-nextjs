@@ -1,0 +1,74 @@
+/*
+ * Charte du produit — seul endroit du dépôt où une couleur brute est autorisée.
+ * Une nouvelle nuance se déclare ici, jamais dans un composant.
+ *
+ * La palette livrée est volontairement neutre : remplacez les échelles `brand` et `accent`
+ * par les vôtres sans toucher aux jetons sémantiques ci-dessous, et toute l'application suit.
+ */
+@theme {
+  --color-brand-50: #eef2ff;
+  --color-brand-100: #e0e7ff;
+  --color-brand-200: #c7d2fe;
+  --color-brand-300: #a5b4fc;
+  --color-brand-400: #818cf8;
+  --color-brand-500: #6366f1;
+  --color-brand-600: #4f46e5;
+  --color-brand-700: #4338ca;
+  --color-brand-800: #3730a3;
+  --color-brand-900: #312e81;
+
+  --color-accent-50: #fffbeb;
+  --color-accent-100: #fef3c7;
+  --color-accent-200: #fde68a;
+  --color-accent-300: #fcd34d;
+  --color-accent-400: #fbbf24;
+  --color-accent-500: #f59e0b;
+  --color-accent-600: #d97706;
+  --color-accent-700: #b45309;
+
+  --color-sand-0: #ffffff;
+  --color-sand-50: #f8fafc;
+  --color-sand-100: #f1f5f9;
+  --color-sand-200: #e2e8f0;
+  --color-sand-300: #cbd5e1;
+  --color-sand-400: #94a3b8;
+  --color-sand-500: #64748b;
+  --color-sand-600: #475569;
+  --color-sand-700: #334155;
+  --color-sand-800: #1e293b;
+  --color-sand-900: #0f172a;
+
+  --color-success: #15803d;
+  --color-success-soft: #dcfce7;
+  --color-warning: #a16207;
+  --color-warning-soft: #fef9c3;
+  --color-danger: #b91c1c;
+  --color-danger-soft: #fee2e2;
+
+  /* Jetons sémantiques : c'est eux que les composants utilisent, jamais une échelle brute. */
+  --color-surface: var(--color-sand-50);
+  --color-surface-raised: var(--color-sand-0);
+  --color-surface-sunken: var(--color-sand-100);
+  --color-border: var(--color-sand-200);
+  --color-border-strong: var(--color-sand-300);
+  --color-ink: var(--color-sand-900);
+  --color-ink-muted: var(--color-sand-600);
+  --color-ink-inverted: var(--color-sand-0);
+
+  --font-sans: var(--font-app-sans), ui-sans-serif, system-ui, sans-serif;
+  --font-display: var(--font-app-display), Georgia, serif;
+
+  --radius-control: 0.75rem;
+  --radius-card: 1rem;
+
+  --shadow-raised: 0 1px 2px rgb(15 23 42 / 0.06), 0 1px 3px rgb(15 23 42 / 0.04);
+  --shadow-overlay: 0 12px 32px rgb(15 23 42 / 0.18);
+}
+
+/* Encoches et barre d'accueil iOS : disponibles comme utilitaires Tailwind (p-safe-bottom…). */
+@theme {
+  --spacing-safe-top: env(safe-area-inset-top, 0px);
+  --spacing-safe-bottom: env(safe-area-inset-bottom, 0px);
+  --spacing-safe-left: env(safe-area-inset-left, 0px);
+  --spacing-safe-right: env(safe-area-inset-right, 0px);
+}
