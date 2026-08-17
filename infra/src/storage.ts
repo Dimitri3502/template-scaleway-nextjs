@@ -1,7 +1,7 @@
 import * as pulumi from "@pulumi/pulumi";
 import * as scaleway from "@pulumiverse/scaleway";
 
-import { resourceName, settings } from "./config";
+import { resourceName, settings } from "./config.ts";
 
 /**
  * Bucket privé et versionné. Aucune politique anonyme : tout accès passe par une URL

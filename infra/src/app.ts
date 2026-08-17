@@ -1,11 +1,11 @@
 import * as pulumi from "@pulumi/pulumi";
 import * as scaleway from "@pulumiverse/scaleway";
 
-import { resourceName, settings } from "./config";
-import { privateDatabaseUrl } from "./database";
-import { privateNetwork } from "./network";
-import { registryNamespace } from "./registry";
-import { bucket, storageAccessKeyId, storageEndpoint, storageSecretAccessKey } from "./storage";
+import { resourceName, settings } from "./config.ts";
+import { privateDatabaseUrl } from "./database.ts";
+import { privateNetwork } from "./network.ts";
+import { registryNamespace } from "./registry.ts";
+import { bucket, storageAccessKeyId, storageEndpoint, storageSecretAccessKey } from "./storage.ts";
 
 /** `memoryLimitBytes` attend des octets ; la configuration, elle, reste exprimée en Mo. */
 const MEGABYTE = 1024 * 1024;

@@ -1,10 +1,10 @@
 import * as pulumi from "@pulumi/pulumi";
 
-import { container, namespace } from "./src/app";
-import { settings } from "./src/config";
-import { adminDatabaseUrl, instance } from "./src/database";
-import { registryNamespace } from "./src/registry";
-import { bucket } from "./src/storage";
+import { container, namespace } from "./src/app.ts";
+import { settings } from "./src/config.ts";
+import { adminDatabaseUrl, instance } from "./src/database.ts";
+import { registryNamespace } from "./src/registry.ts";
+import { bucket } from "./src/storage.ts";
 
 /** `index.ts` ne fait que câbler et exporter : toute la logique vit dans `src/`. */
 

@@ -5,6 +5,10 @@
     "module": "ESNext",
     "moduleResolution": "Bundler",
     "moduleDetection": "force",
+    // Pulumi exécute ce programme avec Node, dont le résolveur ESM exige une extension
+    // explicite : les imports relatifs portent « .ts », ce que TypeScript n'autorise
+    // qu'avec ce drapeau (lui-même conditionné à `noEmit`).
+    "allowImportingTsExtensions": true,
     "esModuleInterop": true,
     "skipLibCheck": true,
     "strict": true,

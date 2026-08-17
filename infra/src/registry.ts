@@ -1,6 +1,6 @@
 import * as scaleway from "@pulumiverse/scaleway";
 
-import { resourceName, settings } from "./config";
+import { resourceName, settings } from "./config.ts";
 
 /**
  * Registre privé où `pnpm deploy` pousse l'image. Il doit exister avant le premier

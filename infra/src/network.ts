@@ -1,6 +1,6 @@
 import * as scaleway from "@pulumiverse/scaleway";
 
-import { resourceName, settings } from "./config";
+import { resourceName, settings } from "./config.ts";
 
 /**
  * Réseau privé régional : c'est par là que le conteneur joint PostgreSQL. La base n'a

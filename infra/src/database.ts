@@ -2,8 +2,8 @@ import * as pulumi from "@pulumi/pulumi";
 import * as random from "@pulumi/random";
 import * as scaleway from "@pulumiverse/scaleway";
 
-import { resourceName, settings } from "./config";
-import { privateNetwork } from "./network";
+import { resourceName, settings } from "./config.ts";
+import { privateNetwork } from "./network.ts";
 
 const DB_NAME = "app";
 const DB_USER = "app";
