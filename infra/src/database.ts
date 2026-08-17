@@ -70,10 +70,17 @@ export const privateDatabaseUrl = instance.privateNetwork.apply((pn) => {
   return connectionUrl(host, pn?.port ?? 5432, "disable");
 });
 
-/** URL d'administration, via l'endpoint public (soumise à l'ACL ci-dessus). */
-const adminHost = pulumi
-  .all([instance.loadBalancer, instance.endpointIp])
-  .apply(([loadBalancer, endpointIp]) => loadBalancer?.hostname ?? loadBalancer?.ip ?? endpointIp);
+/**
+ * URL d'administration, via l'endpoint public (soumise à l'ACL ci-dessus). L'adresse vient
+ * du `loadBalancer` : `endpointIp` et `endpointPort` sont dépréciés au profit de cet attribut.
+ */
+const adminHost = instance.loadBalancer.apply((loadBalancer) => {
+  const host = loadBalancer?.hostname ?? loadBalancer?.ip;
+  if (!host) {
+    throw new Error("L'instance PostgreSQL n'expose ni hostname ni ip sur son endpoint public");
+  }
+  return host;
+});
 
 const adminPort = instance.loadBalancer.apply((loadBalancer) => loadBalancer?.port ?? 5432);
 

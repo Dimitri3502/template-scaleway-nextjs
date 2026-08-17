@@ -7,6 +7,9 @@ import { privateNetwork } from "./network";
 import { registryNamespace } from "./registry";
 import { bucket, storageAccessKeyId, storageEndpoint, storageSecretAccessKey } from "./storage";
 
+/** `memoryLimitBytes` attend des octets ; la configuration, elle, reste exprimée en Mo. */
+const MEGABYTE = 1024 * 1024;
+
 export const namespace = new scaleway.containers.Namespace("app-namespace", {
   name: resourceName("app"),
   region: settings.region,
@@ -21,13 +24,14 @@ export const container = settings.imageTag
   ? new scaleway.containers.Container("app", {
       name: resourceName("web"),
       namespaceId: namespace.id,
-      registryImage: pulumi.interpolate`${registryNamespace.endpoint}/web:${settings.imageTag}`,
+      image: pulumi.interpolate`${registryNamespace.endpoint}/web:${settings.imageTag}`,
       port: 8080,
       protocol: "http1",
       privacy: "public",
-      httpOption: "redirected",
+      // Redirige HTTP vers HTTPS. Remplace `httpOption: "redirected"`, déprécié.
+      httpsConnectionsOnly: true,
       cpuLimit: settings.cpuLimit,
-      memoryLimit: settings.memoryLimit,
+      memoryLimitBytes: settings.memoryLimit * MEGABYTE,
       minScale: settings.minScale,
       maxScale: settings.maxScale,
       timeout: 60,

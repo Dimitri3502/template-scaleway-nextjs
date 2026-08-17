@@ -8,8 +8,9 @@ import { bucket } from "./src/storage";
 
 /** `index.ts` ne fait que câbler et exporter : toute la logique vit dans `src/`. */
 
+/** `publicEndpoint` porte déjà le schéma (`https://…`), contrairement à l'ancien `domainName`. */
 export const appUrl = container
-  ? pulumi.interpolate`https://${container.domainName}`
+  ? container.publicEndpoint
   : "non déployée — lancez `pnpm deploy` pour construire et publier l'image";
 
 export const registryEndpoint = registryNamespace.endpoint;

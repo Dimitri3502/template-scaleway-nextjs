@@ -12,7 +12,6 @@ const config = new pulumi.Config();
 export const settings = {
   /** `fr-par`, `nl-ams` ou `pl-waw`. */
   region: config.get("region") ?? "fr-par",
-  zone: config.get("zone") ?? "fr-par-1",
 
   /** Type de nœud PostgreSQL. `DB-DEV-S` est le moins cher, suffisant pour démarrer. */
   dbNodeType: config.get("dbNodeType") ?? "DB-DEV-S",
@@ -29,6 +28,7 @@ export const settings = {
   minScale: config.getNumber("minScale") ?? 1,
   maxScale: config.getNumber("maxScale") ?? 3,
   cpuLimit: config.getNumber("cpuLimit") ?? 1000,
+  /** En Mo. `src/app.ts` le convertit en octets pour `memoryLimitBytes`. */
   memoryLimit: config.getNumber("memoryLimit") ?? 2048,
 
   /**
@@ -42,8 +42,8 @@ export const settings = {
   clerkPublishableKey: config.require("clerkPublishableKey"),
 } as const;
 
-export const stackName = pulumi.getStack();
-export const projectName = pulumi.getProject();
+const stackName = pulumi.getStack();
+const projectName = pulumi.getProject();
 
 /** Préfixe de nommage des ressources : `acme-prod-…`. */
 export function resourceName(suffix: string): string {

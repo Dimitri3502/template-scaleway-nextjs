@@ -10,7 +10,6 @@ import { resourceName, settings } from "./config";
 export const bucket = new scaleway.object.Bucket("attachments", {
   name: resourceName("attachments"),
   region: settings.region,
-  acl: "private",
   versioning: { enabled: true },
   corsRules: [
     {
@@ -21,6 +20,18 @@ export const bucket = new scaleway.object.Bucket("attachments", {
       maxAgeSeconds: 3000,
     },
   ],
+});
+
+/**
+ * La privauté se déclare par une ressource dédiée : l'attribut `acl` du bucket est déprécié.
+ * `projectId` est passé explicitement — l'API S3 est scopée par projet, et une ressource
+ * fille créée sur le projet par défaut échouerait en 403 sur un autre projet.
+ */
+export const bucketAcl = new scaleway.object.BucketAcl("attachments-acl", {
+  bucket: bucket.id,
+  acl: "private",
+  region: settings.region,
+  projectId: bucket.projectId,
 });
 
 /**
