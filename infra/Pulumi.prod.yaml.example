@@ -6,6 +6,7 @@
 #   pulumi config set clerkPublishableKey pk_live_xxx
 #   pulumi config set --secret clerkSecretKey sk_live_xxx
 #   pulumi config set adminCidr "$(curl -s https://ifconfig.me)/32"
+#   pulumi config set --secret cloudflare:apiToken cf_xxx   # seulement avec un domaine custom
 #
 # `pulumi config set --secret` chiffre la valeur : le fichier peut être versionné tel quel.
 # Ne recopiez jamais un secret en clair ici.
@@ -23,3 +24,32 @@ config:
   # acme:adminCidr: 203.0.113.4/32
   # acme:clerkSecretKey: (chiffré par `pulumi config set --secret`)
   # acme:imageTag: (écrit automatiquement par `pnpm deploy`)
+
+  # --- Nom de domaine (optionnel) — voir docs/DEPLOY.md, section « Nom de domaine » ---------
+  # Sans `appHostname` ni `cloudflareZoneId`, aucun enregistrement n'est créé et le provider
+  # Cloudflare n'est pas sollicité : son jeton devient inutile.
+  # acme:appHostname: app.mondomaine.fr
+  # acme:cloudflareZoneId: 0123456789abcdef0123456789abcdef
+  # acme:dnsTtl: "300"
+  # Proxy Cloudflare : il fait échouer la validation du certificat par Scaleway. Laissez false.
+  # acme:cloudflareProxied: "false"
+  #
+  # Les cinq CNAME du domaine custom Clerk, recopiés depuis le dashboard Clerk → Domains.
+  # `key` nomme la ressource Pulumi ; `host` et `target` sont des noms complets ; la partie
+  # `xxxxxxxxxxxx` est propre à votre instance Clerk.
+  # acme:clerkDnsRecords:
+  #   - key: accounts
+  #     host: accounts.mondomaine.fr
+  #     target: accounts.clerk.services
+  #   - key: clerk
+  #     host: clerk.mondomaine.fr
+  #     target: frontend-api.clerk.services
+  #   - key: clk-domainkey
+  #     host: clk._domainkey.mondomaine.fr
+  #     target: dkim1.xxxxxxxxxxxx.clerk.services
+  #   - key: clk2-domainkey
+  #     host: clk2._domainkey.mondomaine.fr
+  #     target: dkim2.xxxxxxxxxxxx.clerk.services
+  #   - key: clkmail
+  #     host: clkmail.mondomaine.fr
+  #     target: mail.xxxxxxxxxxxx.clerk.services

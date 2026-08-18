@@ -3,6 +3,17 @@ import * as pulumi from "@pulumi/pulumi";
 const config = new pulumi.Config();
 
 /**
+ * CNAME réclamé par Clerk pour un domaine custom (dashboard Clerk → Domains). `host` et
+ * `target` sont des noms complets : le provider Cloudflare v6 n'accepte plus de nom relatif
+ * à la zone. `key` nomme la ressource Pulumi — le changer détruit puis recrée le CNAME.
+ */
+export interface ClerkDnsRecord {
+  key: string;
+  host: string;
+  target: string;
+}
+
+/**
  * Configuration du stack. Les secrets sont chiffrés par Pulumi dans `Pulumi.prod.yaml` :
  * aucune valeur en clair n'entre dans le dépôt.
  *
@@ -42,6 +53,31 @@ export const settings = {
   clerkSecretKey: config.requireSecret("clerkSecretKey"),
   /** Publiable, donc non secrète — mais inlinée au build : elle sert au `docker build`. */
   clerkPublishableKey: config.require("clerkPublishableKey"),
+
+  /**
+   * Nom d'hôte public de l'application (`app.mondomaine.fr`). Vide, le conteneur n'est
+   * joignable que par son endpoint Scaleway et `src/dns.ts` ne crée rien.
+   */
+  appHostname: config.get("appHostname") ?? "",
+
+  /**
+   * Zone Cloudflare hébergeant `appHostname` et les enregistrements Clerk. Absente, aucune
+   * ressource Cloudflare n'est créée — le provider n'est alors pas sollicité et son jeton
+   * (`cloudflare:apiToken`) n'est pas nécessaire.
+   */
+  cloudflareZoneId: config.get("cloudflareZoneId") ?? "",
+
+  /**
+   * Proxy Cloudflare sur le seul CNAME de l'application. À laisser désactivé : il fait
+   * échouer la validation du certificat par Scaleway, qui gère déjà TLS.
+   */
+  cloudflareProxied: config.getBoolean("cloudflareProxied") ?? false,
+
+  /** TTL des enregistrements non proxifiés. `1` = automatique, sinon de 60 à 86400. */
+  dnsTtl: config.getNumber("dnsTtl") ?? 300,
+
+  /** CNAME du domaine custom Clerk, recopiés depuis le dashboard. */
+  clerkDnsRecords: config.getObject<ClerkDnsRecord[]>("clerkDnsRecords") ?? [],
 } as const;
 
 const stackName = pulumi.getStack();

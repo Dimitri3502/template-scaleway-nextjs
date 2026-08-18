@@ -40,6 +40,11 @@ pulumi config set --secret clerkSecretKey sk_live_xxxxxxxx
 # Autorise votre poste à joindre l'endpoint public de PostgreSQL (migrations, db:studio).
 # Obligatoire : pnpm deploy applique les migrations depuis ce poste.
 pulumi config set adminCidr "$(curl -s https://ifconfig.me)/32"
+
+# Facultatif — domaine custom et DNS, voir section 8.
+pulumi config set appHostname app.mondomaine.fr
+pulumi config set cloudflareZoneId 0123456789abcdef0123456789abcdef
+pulumi config set --secret cloudflare:apiToken cf_xxxxxxxx
 ```
 
 `pulumi config set --secret` chiffre la valeur : `Pulumi.prod.yaml` peut être versionné.
@@ -109,6 +114,11 @@ configuration Pulumi. Si vous ajoutez une variable publique, ajoutez-la aux troi
 Les secrets, eux, sont bien des variables d'exécution : ils arrivent par
 `secretEnvironmentVariables` dans `infra/src/app.ts`.
 
+Corollaire pour Clerk : **la clé publiable encode l'URL de la Frontend API**. Passer l'instance
+sur un domaine custom la change. Il faut alors `pulumi config set clerkPublishableKey pk_live_…`
+**puis un `pnpm deploy` complet** — un `pulumi up` seul laisserait l'ancienne clé inlinée dans
+l'image.
+
 ## 6. Ce que Pulumi crée
 
 | Ressource | Fichier | Remarque |
@@ -120,8 +130,11 @@ Les secrets, eux, sont bien des variables d'exécution : ils arrivent par
 | Application IAM + clé API | `src/storage.ts` | Portée limitée aux objets du projet |
 | Namespace de registre | `src/registry.ts` | Privé |
 | Namespace + conteneur | `src/app.ts` | `minScale: 1`, `maxScale: 3`, port 8080 |
+| CNAME + domaine du conteneur | `src/dns.ts` | Seulement si `appHostname` et `cloudflareZoneId` sont définis |
+| CNAME du domaine Clerk | `src/dns.ts` | Jamais proxifiés, pilotés par `clerkDnsRecords` |
 
-Sorties utiles : `appUrl`, `registryEndpoint`, `bucketName`, `databaseUrl` (secrète).
+Sorties utiles : `appUrl`, `containerUrl`, `registryEndpoint`, `bucketName`, `databaseUrl`
+(secrète). `appUrl` renvoie le domaine custom dès qu'il est câblé, sinon l'endpoint Scaleway.
 
 ## 7. Coût indicatif
 
@@ -137,17 +150,44 @@ cet ordre de grandeur n'engage rien.
 
 ## 8. Nom de domaine
 
-Ajoutez dans `infra/src/app.ts` :
+`infra/src/dns.ts` s'en charge, à condition que la zone soit chez **Cloudflare**. Le module est
+inerte tant que `appHostname` et `cloudflareZoneId` ne sont pas configurés : un projet qui n'en
+veut pas n'a rien à faire, et aucun jeton Cloudflare à fournir.
 
-```ts
-new scaleway.containers.Domain("app-domain", {
-  containerId: container.id,
-  hostname: "app.mondomaine.fr",
-});
-```
+### Ce que Pulumi pose
 
-Le CNAME doit pointer vers `container.domainName` avant le `pulumi up`, sinon la validation du
-certificat échoue.
+1. Un CNAME `app.mondomaine.fr` → endpoint du conteneur.
+2. Un `scaleway.containers.Domain`, qui attache le nom au conteneur et déclenche l'émission du
+   certificat. `dependsOn` garantit l'ordre : Scaleway valide par un challenge HTTP-01 et le
+   CNAME doit résoudre avant.
+3. Les CNAME du domaine custom Clerk, indépendants du conteneur — ils peuvent donc être posés
+   dès le premier `pulumi up`, avant même qu'une image existe.
+
+### Configuration
+
+Le jeton Cloudflare se fabrique dans *My Profile → API Tokens*, à partir du gabarit
+**« Edit zone DNS »** (`Zone:DNS:Edit` + `Zone:Read`), restreint à la seule zone concernée.
+L'identifiant de zone se lit dans l'onglet *Overview* du domaine. Il passe par
+`pulumi config set --secret cloudflare:apiToken`, jamais par une variable d'environnement — le
+stack porte son identité, comme pour `scaleway:profile`.
+
+Les cinq CNAME Clerk se recopient du dashboard Clerk → *Domains* dans `clerkDnsRecords` (voir
+`Pulumi.prod.yaml.example`). `host` et `target` sont des **noms complets** : le provider
+Cloudflare v6 ne prend plus de nom relatif à la zone. Ils restent en résolution directe — Clerk
+exige des enregistrements « DNS only », le proxy Cloudflare fait échouer sa vérification.
+
+### Si le domaine reste en erreur
+
+Scaleway a **trois minutes** pour valider ; passé ce délai le domaine part en `error` et il faut
+relancer `pulumi up`. Les causes habituelles :
+
+- CNAME pas encore propagé, ou **cache DNS négatif** si le nom a été interrogé avant sa création ;
+- un ancien enregistrement au TTL long ;
+- un enregistrement **CAA** qui n'autorise pas `letsencrypt.org` ;
+- le proxy Cloudflare (`cloudflareProxied`), qui met en cache `/.well-known/acme-challenge`.
+
+`appHostname` doit être un sous-domaine : l'apex demanderait le CNAME flattening de Cloudflare,
+hors périmètre de ce socle.
 
 ## 9. Détruire
 
@@ -157,3 +197,5 @@ cd infra && pulumi destroy --stack prod
 
 Le bucket refuse d'être détruit s'il contient encore des objets : videz-le, ou passez
 `forceDestroy: true` sur la ressource `object.Bucket`.
+
+Les enregistrements Cloudflare partent avec le reste : le jeton doit être encore valide.
