@@ -2,6 +2,7 @@
 #
 #   cd infra
 #   pulumi stack init prod
+#   pulumi config set scaleway:profile mon-profil
 #   pulumi config set clerkPublishableKey pk_live_xxx
 #   pulumi config set --secret clerkSecretKey sk_live_xxx
 #   pulumi config set adminCidr "$(curl -s https://ifconfig.me)/32"
@@ -9,6 +10,9 @@
 # `pulumi config set --secret` chiffre la valeur : le fichier peut être versionné tel quel.
 # Ne recopiez jamais un secret en clair ici.
 config:
+  # Profil de ~/.config/scw/config.yaml. Il porte la clé API, l'organisation et le projet :
+  # le stack est ainsi lié à une organisation, quel que soit le profil scw actif.
+  scaleway:profile: mon-profil
   acme:region: fr-par
   acme:dbNodeType: DB-DEV-S
   acme:minScale: "1"

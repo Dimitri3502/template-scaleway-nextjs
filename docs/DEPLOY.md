@@ -6,18 +6,23 @@ Cible : **Serverless Containers** pour l'application, **Managed Database** pour 
 
 ## 1. Prérequis
 
-- Un projet Scaleway et une clé API (console → *IAM* → *Clés API*).
 - La CLI [Pulumi](https://www.pulumi.com/docs/install/) et un compte Pulumi (le backend gratuit
   suffit ; `pulumi login --local` fonctionne aussi).
+- La CLI [scw](https://github.com/scaleway/scaleway-cli), configurée avec un profil.
 - Docker en état de construire une image `linux/amd64`.
 
+Les identifiants Scaleway viennent d'un profil `scw` — jamais de variables d'environnement.
+La CLI en stocke autant que vous avez d'organisations, dans `~/.config/scw/config.yaml` :
+
 ```bash
-export SCW_ACCESS_KEY=SCWXXXXXXXXXXXXXXXXX
-export SCW_SECRET_KEY=xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx
-export SCW_DEFAULT_PROJECT_ID=xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx
-export SCW_DEFAULT_REGION=fr-par
-export SCW_DEFAULT_ZONE=fr-par-1
+scw init --profile mon-profil     # créer ; scw config profile list pour lister
 ```
+
+Le stack désigne ensuite le profil à employer (étape suivante), et c'est ce profil-là qui fait
+autorité — pas celui actif dans votre session. Avec plusieurs organisations sur la même
+machine, il devient impossible de déployer dans la mauvaise : `pulumi up` et `pnpm deploy`
+tirent leur identité du même endroit, et `pnpm deploy` efface les `SCW_*` traînant dans
+l'environnement avant d'appeler Pulumi.
 
 ## 2. Créer le stack
 
@@ -25,6 +30,9 @@ export SCW_DEFAULT_ZONE=fr-par-1
 cd infra
 pnpm install
 pulumi stack init prod
+
+# Lie le stack à une organisation. Obligatoire : pnpm deploy s'arrête sans cette clé.
+pulumi config set scaleway:profile mon-profil
 
 pulumi config set clerkPublishableKey pk_live_xxxxxxxx
 pulumi config set --secret clerkSecretKey sk_live_xxxxxxxx

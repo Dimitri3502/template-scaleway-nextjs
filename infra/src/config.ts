@@ -6,8 +6,9 @@ const config = new pulumi.Config();
  * Configuration du stack. Les secrets sont chiffrés par Pulumi dans `Pulumi.prod.yaml` :
  * aucune valeur en clair n'entre dans le dépôt.
  *
- * Les identifiants Scaleway eux-mêmes ne passent pas par ici mais par l'environnement
- * (`SCW_ACCESS_KEY`, `SCW_SECRET_KEY`, `SCW_DEFAULT_PROJECT_ID`), comme attendu par le provider.
+ * Les identifiants Scaleway eux-mêmes ne passent pas par ici : la clé `scaleway:profile`
+ * désigne un profil de `~/.config/scw/config.yaml`, que le provider lit directement. Le stack
+ * porte ainsi son organisation, indépendamment du profil actif dans la session.
  */
 export const settings = {
   /** `fr-par`, `nl-ams` ou `pl-waw`. */
