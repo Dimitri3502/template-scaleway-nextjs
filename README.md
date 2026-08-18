@@ -48,7 +48,7 @@ Server Components et les Server Actions suffisent, et la validation des `FormDat
 | `pnpm db:migrate` / `pnpm db:seed` | Applique les migrations / charge le jeu de démonstration |
 | `pnpm db:studio` | Ouvre Drizzle Studio |
 | `pnpm infra:up` / `infra:down` | Démarre / arrête PostgreSQL et MinIO en local |
-| `pnpm deploy` | Construit l'image, la pousse, met le stack Pulumi à jour |
+| `pnpm deploy` | Construit l'image, la pousse, migre le schéma, met le stack Pulumi à jour |
 
 ## Structure
 

@@ -21,7 +21,8 @@ export const settings = {
   /**
    * Bloc autorisé à joindre l'endpoint public de PostgreSQL (migrations et `db:studio`
    * depuis votre poste). Le conteneur, lui, passe par le réseau privé.
-   * Laissez vide pour n'ouvrir aucun accès public.
+   * Vide, aucun accès public n'est ouvert — et `pnpm deploy` s'arrête, faute de pouvoir
+   * migrer le schéma.
    */
   adminCidr: config.get("adminCidr") ?? "",
 

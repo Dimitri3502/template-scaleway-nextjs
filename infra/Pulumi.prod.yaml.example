@@ -18,6 +18,8 @@ config:
   acme:minScale: "1"
   acme:maxScale: "3"
   acme:clerkPublishableKey: pk_test_xxxxxxxxxxxxxxxxxxxxxxxxxxxx
+  # Bloc autorisé sur l'endpoint public de PostgreSQL. Exigé par `pnpm deploy`, qui applique
+  # les migrations depuis votre poste.
   # acme:adminCidr: 203.0.113.4/32
   # acme:clerkSecretKey: (chiffré par `pulumi config set --secret`)
   # acme:imageTag: (écrit automatiquement par `pnpm deploy`)

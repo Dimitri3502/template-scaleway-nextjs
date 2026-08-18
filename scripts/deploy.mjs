@@ -71,6 +71,22 @@ if (!profile) {
   process.exit(1);
 }
 
+/**
+ * Les migrations partent de ce poste, par l'endpoint public de PostgreSQL, ouvert au seul
+ * `adminCidr` : sans ce bloc la connexion n'aboutirait jamais, et on ne l'apprendrait qu'après
+ * le build de l'image.
+ */
+const MIGRATE = process.env.SKIP_MIGRATIONS !== "1";
+if (MIGRATE && !stackConfig("adminCidr")) {
+  console.error(
+    `Le stack « ${STACK} » n'ouvre l'endpoint PostgreSQL à aucune adresse : les migrations ne\n` +
+      "peuvent pas être appliquées depuis ce poste.\n" +
+      `  cd infra && pulumi config set adminCidr "$(curl -s https://ifconfig.me)/32"\n` +
+      "Ou SKIP_MIGRATIONS=1 pnpm deploy pour ne déployer que l'image.",
+  );
+  process.exit(1);
+}
+
 const env = { ...process.env };
 for (const name of AMBIENT_SCW_VARS) delete env[name];
 env.SCW_PROFILE = profile;
@@ -121,6 +137,21 @@ run(
   ],
   { cwd: ROOT },
 );
+
+/**
+ * Le schéma migre avant que la nouvelle image ne serve : l'inverse ferait tourner du code neuf
+ * sur un schéma ancien pendant tout le déploiement. En contrepartie, une migration doit rester
+ * compatible avec le code déjà en ligne — c'est la règle habituelle du déploiement en deux temps.
+ */
+if (MIGRATE) {
+  console.log("\n→ Migrations\n");
+  run("pnpm", ["db:migrate"], {
+    cwd: ROOT,
+    env: { ...env, DATABASE_URL: stackOutput("databaseUrl", { secret: true }) },
+  });
+} else {
+  console.warn("\n⚠ SKIP_MIGRATIONS=1 : le schéma n'est pas migré.\n");
+}
 
 run("pulumi", ["config", "set", "imageTag", tag, "--stack", STACK], { cwd: INFRA, env });
 run("pulumi", ["up", "--stack", STACK, "--yes"], { cwd: INFRA, env });

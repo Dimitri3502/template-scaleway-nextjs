@@ -38,6 +38,7 @@ pulumi config set clerkPublishableKey pk_live_xxxxxxxx
 pulumi config set --secret clerkSecretKey sk_live_xxxxxxxx
 
 # Autorise votre poste à joindre l'endpoint public de PostgreSQL (migrations, db:studio).
+# Obligatoire : pnpm deploy applique les migrations depuis ce poste.
 pulumi config set adminCidr "$(curl -s https://ifconfig.me)/32"
 ```
 
@@ -61,8 +62,8 @@ pnpm deploy
 ```
 
 `pnpm deploy` enchaîne : `docker login` sur le registre → `docker buildx build --push` avec les
-build args → `pulumi config set imageTag <sha>` → `pulumi up`. Le conteneur est créé à ce
-moment-là, et `pulumi stack output appUrl` donne l'URL.
+build args → `pnpm db:migrate` → `pulumi config set imageTag <sha>` → `pulumi up`. Le conteneur
+est créé à ce moment-là, et `pulumi stack output appUrl` donne l'URL.
 
 Le build passe par un builder `docker-container` dédié (`deploy-scaleway`), créé au premier
 déploiement : l'image part au registre depuis BuildKit, le magasin d'images local n'est jamais
@@ -72,7 +73,17 @@ Les fois suivantes, `pnpm deploy` seul suffit.
 
 ## 4. Migrations
 
-Elles se lancent depuis votre poste, contre l'endpoint public protégé par `adminCidr` :
+`pnpm deploy` les applique lui-même : une fois l'image poussée, avant que `pulumi up` ne la mette
+en service. Elles partent de votre poste, par l'endpoint public protégé par `adminCidr` — d'où
+l'arrêt immédiat du déploiement si ce bloc n'est pas configuré.
+
+Le schéma migre donc pendant que la version précédente sert encore le trafic : **une migration
+doit rester compatible avec le code déjà en ligne**. Renommer ou supprimer une colonne, la passer
+en `NOT NULL` sans valeur par défaut — cela se fait en deux déploiements.
+
+`SKIP_MIGRATIONS=1 pnpm deploy` ne publie que l'image, sans toucher au schéma.
+
+Hors déploiement, à la main :
 
 ```bash
 cd infra && pulumi stack output databaseUrl --show-secrets --stack prod
@@ -80,9 +91,9 @@ cd infra && pulumi stack output databaseUrl --show-secrets --stack prod
 DATABASE_URL='<la valeur ci-dessus>' pnpm db:migrate
 ```
 
-C'est volontairement manuel : appliquer les migrations au démarrage du conteneur créerait une
-course dès que plusieurs instances démarrent en même temps. Si vous voulez automatiser, la bonne
-brique est un **Serverless Job** dédié, déclenché avant la mise à jour du conteneur.
+Elles ne sont pas appliquées au démarrage du conteneur : ce serait une course dès que plusieurs
+instances démarrent en même temps. Pour les sortir du poste de développement, la bonne brique est
+un **Serverless Job** dédié, déclenché avant la mise à jour du conteneur.
 
 ## 5. Le piège des variables NEXT_PUBLIC_*
 
