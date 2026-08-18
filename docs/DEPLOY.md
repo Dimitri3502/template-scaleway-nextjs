@@ -45,7 +45,7 @@ pulumi config set adminCidr "$(curl -s https://ifconfig.me)/32"
 
 ## 3. Amorçage — en deux temps
 
-Le registre doit exister avant le premier `docker push`, et le conteneur ne peut pas démarrer
+Le registre doit exister avant le premier envoi d'image, et le conteneur ne peut pas démarrer
 sans image. Le premier passage crée donc tout **sauf** le conteneur :
 
 ```bash
@@ -60,9 +60,13 @@ Puis le déploiement proprement dit, depuis la racine du dépôt :
 pnpm deploy
 ```
 
-`pnpm deploy` enchaîne : `docker login` sur le registre → `docker build` avec les build args →
-`docker push` → `pulumi config set imageTag <sha>` → `pulumi up`. Le conteneur est créé à ce
+`pnpm deploy` enchaîne : `docker login` sur le registre → `docker buildx build --push` avec les
+build args → `pulumi config set imageTag <sha>` → `pulumi up`. Le conteneur est créé à ce
 moment-là, et `pulumi stack output appUrl` donne l'URL.
+
+Le build passe par un builder `docker-container` dédié (`deploy-scaleway`), créé au premier
+déploiement : l'image part au registre depuis BuildKit, le magasin d'images local n'est jamais
+sollicité.
 
 Les fois suivantes, `pnpm deploy` seul suffit.
 

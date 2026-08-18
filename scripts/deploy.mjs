@@ -24,12 +24,29 @@ const AMBIENT_SCW_VARS = [
   "SCW_DEFAULT_ORGANIZATION_ID",
 ];
 
+/**
+ * Le builder par défaut construit dans le magasin d'images local, et le `docker push` qui suit
+ * se fait refuser par le registre Scaleway (`insufficient_scope`). Un builder `docker-container`
+ * pousse depuis BuildKit, en réutilisant l'authentification du `docker login` — c'est aussi le
+ * seul driver qui construit du `linux/amd64` de façon fiable depuis un Mac ARM.
+ */
+const BUILDER = "deploy-scaleway";
+
 function run(command, args, options = {}) {
   return execFileSync(command, args, { stdio: "inherit", ...options });
 }
 
 function capture(command, args, options = {}) {
   return execFileSync(command, args, { encoding: "utf8", ...options }).trim();
+}
+
+/** Créé au premier déploiement, réutilisé — et son cache avec — les fois suivantes. */
+function ensureBuilder() {
+  try {
+    capture("docker", ["buildx", "inspect", BUILDER], { stdio: ["ignore", "pipe", "ignore"] });
+  } catch {
+    run("docker", ["buildx", "create", "--name", BUILDER, "--driver", "docker-container"]);
+  }
 }
 
 /** `undefined` si la clé n'est pas définie sur le stack : `pulumi config get` sort en 1. */
@@ -86,21 +103,24 @@ run("docker", ["login", registryHost, "-u", "nologin", "--password-stdin"], {
   stdio: ["pipe", "inherit", "inherit"],
 });
 
+ensureBuilder();
+
+// Le builder ne charge rien dans le magasin local : l'image part au registre depuis BuildKit.
 run(
   "docker",
   [
-    "build",
+    "buildx", "build",
+    "--builder", BUILDER,
     "--platform", "linux/amd64",
     // NEXT_PUBLIC_* : inlinées au build, elles n'ont aucun effet en variable de conteneur.
     "--build-arg", `NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY=${publishableKey}`,
     "--build-arg", `NEXT_PUBLIC_APP_VERSION=${tag}`,
     "-t", image,
+    "--push",
     ".",
   ],
   { cwd: ROOT },
 );
-
-run("docker", ["push", image], { cwd: ROOT });
 
 run("pulumi", ["config", "set", "imageTag", tag, "--stack", STACK], { cwd: INFRA, env });
 run("pulumi", ["up", "--stack", STACK, "--yes"], { cwd: INFRA, env });
