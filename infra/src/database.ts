@@ -8,11 +8,20 @@ import { privateNetwork } from "./network.ts";
 const DB_NAME = "app";
 const DB_USER = "app";
 
+/**
+ * Scaleway impose les quatre classes de caractères ; un tirage aléatoire de 32 caractères peut
+ * très bien ne contenir aucune majuscule. Sans ces minimums, la création de l'instance échoue
+ * une fois de temps en temps, sur un mot de passe qu'on ne voit jamais.
+ */
 const password = new random.RandomPassword("db-password", {
   length: 32,
   special: true,
   // Ces caractères casseraient l'URL de connexion.
   overrideSpecial: "-_=+",
+  minLower: 1,
+  minUpper: 1,
+  minNumeric: 1,
+  minSpecial: 1,
 });
 
 export const instance = new scaleway.databases.Instance("database", {
