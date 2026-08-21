@@ -1,5 +1,6 @@
 #!/usr/bin/env node
-// Renomme le template puis s'efface. Usage : pnpm setup <nom-du-projet>
+// Renomme le template puis s'efface. Usage : pnpm run setup <nom-du-projet>
+// `run` est obligatoire : `pnpm setup` est une commande native de pnpm, qui masque ce script.
 
 import { copyFileSync, existsSync, readdirSync, readFileSync, rmSync, statSync, writeFileSync } from "node:fs";
 import { dirname, join, resolve } from "node:path";
@@ -13,7 +14,7 @@ const BINARY_EXTENSIONS = /\.(png|jpe?g|gif|webp|ico|woff2?|ttf|otf|pdf|zip|lock
 const name = process.argv[2];
 
 if (!name) {
-  console.error("Usage : pnpm setup <nom-du-projet>");
+  console.error("Usage : pnpm run setup <nom-du-projet>");
   process.exit(1);
 }
 

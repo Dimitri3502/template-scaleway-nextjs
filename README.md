@@ -7,7 +7,7 @@ et déploiement sont déjà câblés. Il reste à écrire le métier.
 
 ```bash
 # 1. « Use this template » sur GitHub, puis :
-pnpm setup mon-projet     # renomme tout, crée apps/web/.env, puis s'efface
+pnpm run setup mon-projet # renomme tout, crée apps/web/.env, puis s'efface
 # 2. Renseigner les clés Clerk dans apps/web/.env
 pnpm install
 pnpm infra:up             # PostgreSQL 17 + MinIO (bucket privé versionné)
