@@ -5,7 +5,7 @@
 #   pulumi config set scaleway:profile mon-profil
 #   pulumi config set clerkPublishableKey pk_live_xxx
 #   pulumi config set --secret clerkSecretKey sk_live_xxx
-#   pulumi config set adminCidr "$(curl -s https://ifconfig.me)/32"
+#   pulumi config set adminCidr "$(curl -4 -s https://ifconfig.me)/32"
 #   pulumi config set --secret cloudflare:apiToken cf_xxx   # seulement avec un domaine custom
 #
 # `pulumi config set --secret` chiffre la valeur : le fichier peut être versionné tel quel.

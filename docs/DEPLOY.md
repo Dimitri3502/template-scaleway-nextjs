@@ -39,7 +39,7 @@ pulumi config set --secret clerkSecretKey sk_live_xxxxxxxx
 
 # Autorise votre poste à joindre l'endpoint public de PostgreSQL (migrations, db:studio).
 # Obligatoire : pnpm deploy applique les migrations depuis ce poste.
-pulumi config set adminCidr "$(curl -s https://ifconfig.me)/32"
+pulumi config set adminCidr "$(curl -4 -s https://ifconfig.me)/32"
 
 # Facultatif — domaine custom et DNS, voir section 8.
 pulumi config set appHostname app.mondomaine.fr

@@ -81,7 +81,7 @@ if (MIGRATE && !stackConfig("adminCidr")) {
   console.error(
     `Le stack « ${STACK} » n'ouvre l'endpoint PostgreSQL à aucune adresse : les migrations ne\n` +
       "peuvent pas être appliquées depuis ce poste.\n" +
-      `  cd infra && pulumi config set adminCidr "$(curl -s https://ifconfig.me)/32"\n` +
+      `  cd infra && pulumi config set adminCidr "$(curl -4 -s https://ifconfig.me)/32"\n` +
       "Ou SKIP_MIGRATIONS=1 pnpm deploy pour ne déployer que l'image.",
   );
   process.exit(1);
@@ -107,7 +107,8 @@ function stackOutput(name, { secret = false } = {}) {
 
 const registryEndpoint = stackOutput("registryEndpoint");
 const publishableKey = stackOutput("clerkPublishableKey");
-const tag = process.env.IMAGE_TAG ?? capture("git", ["rev-parse", "--short", "HEAD"], { cwd: ROOT });
+const tag =
+  process.env.IMAGE_TAG ?? capture("git", ["rev-parse", "--short", "HEAD"], { cwd: ROOT });
 const image = `${registryEndpoint}/web:${tag}`;
 
 console.log(`\n→ Profil Scaleway : ${profile}`);
@@ -125,13 +126,19 @@ ensureBuilder();
 run(
   "docker",
   [
-    "buildx", "build",
-    "--builder", BUILDER,
-    "--platform", "linux/amd64",
+    "buildx",
+    "build",
+    "--builder",
+    BUILDER,
+    "--platform",
+    "linux/amd64",
     // NEXT_PUBLIC_* : inlinées au build, elles n'ont aucun effet en variable de conteneur.
-    "--build-arg", `NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY=${publishableKey}`,
-    "--build-arg", `NEXT_PUBLIC_APP_VERSION=${tag}`,
-    "-t", image,
+    "--build-arg",
+    `NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY=${publishableKey}`,
+    "--build-arg",
+    `NEXT_PUBLIC_APP_VERSION=${tag}`,
+    "-t",
+    image,
     "--push",
     ".",
   ],
