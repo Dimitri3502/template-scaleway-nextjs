@@ -126,6 +126,7 @@ l'image.
 | Réseau privé régional | `src/network.ts` | Le conteneur joint PostgreSQL sans passer par Internet |
 | Instance PostgreSQL 17 | `src/database.ts` | `DB-DEV-S` par défaut, sauvegardes quotidiennes 7 jours |
 | ACL de la base | `src/database.ts` | Créée uniquement si `adminCidr` est défini |
+| Privilèges de l'utilisateur | `src/database.ts` | `all` sur la base : Scaleway n'accorde rien par défaut |
 | Bucket privé versionné | `src/storage.ts` | CORS ouvert pour l'envoi direct navigateur → bucket |
 | Application IAM + clé API | `src/storage.ts` | Portée limitée aux objets du projet |
 | Namespace de registre | `src/registry.ts` | Privé |

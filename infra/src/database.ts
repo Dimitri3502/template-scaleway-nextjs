@@ -37,6 +37,11 @@ export const instance = new scaleway.databases.Instance("database", {
   backupScheduleRetention: 7,
   userName: DB_USER,
   password: password.result,
+  // Endpoint public (load-balancer) EN PLUS du réseau privé : sans ce bloc, une instance
+  // en réseau privé seul n'expose aucun endpoint public et `instance.loadBalancer` reste
+  // vide → migrations/seed/studio depuis le poste impossibles. L'accès public reste fermé
+  // par l'ACL (adminCidr) ; le conteneur, lui, passe toujours par le réseau privé.
+  loadBalancer: {},
   privateNetwork: {
     pnId: privateNetwork.id,
     // IPAM attribue l'adresse et publie un nom d'hôte stable dans le réseau privé.
@@ -48,6 +53,22 @@ export const database = new scaleway.databases.Database("database-app", {
   instanceId: instance.id,
   region: settings.region,
   name: DB_NAME,
+});
+
+/**
+ * Sans ce privilège, l'utilisateur initial de l'instance n'a **rien** sur la base : Scaleway
+ * crée toute base de l'API sous `_rdb_superadmin` et n'accorde même pas le CONNECT. Les
+ * migrations échouent alors sur un `permission denied for database "app"` (SQLSTATE 42501).
+ *
+ * `all` couvre les objets existants comme à venir : les migrations tournent sous ce même
+ * utilisateur, qui possède donc les tables qu'il crée.
+ */
+export const privilege = new scaleway.databases.Privilege("database-privilege", {
+  instanceId: instance.id,
+  region: settings.region,
+  databaseName: database.name,
+  userName: DB_USER,
+  permission: "all",
 });
 
 /**
@@ -72,7 +93,9 @@ function connectionUrl(host: pulumi.Input<string>, port: pulumi.Input<number>, s
  * `sslmode=disable`. L'endpoint public, lui, exige TLS.
  */
 export const privateDatabaseUrl = instance.privateNetwork.apply((pn) => {
-  const host = pn?.hostname ?? pn?.ip;
+  // Scaleway renvoie `hostname: ""` quand l'endpoint n'a pas de nom : `??` retiendrait
+  // cette chaîne vide, d'où `||`, qui bascule bien sur l'IP.
+  const host = pn?.hostname || pn?.ip;
   if (!host) {
     throw new Error("Le réseau privé de l'instance PostgreSQL n'expose ni hostname ni ip");
   }
@@ -84,7 +107,8 @@ export const privateDatabaseUrl = instance.privateNetwork.apply((pn) => {
  * du `loadBalancer` : `endpointIp` et `endpointPort` sont dépréciés au profit de cet attribut.
  */
 const adminHost = instance.loadBalancer.apply((loadBalancer) => {
-  const host = loadBalancer?.hostname ?? loadBalancer?.ip;
+  // Même chaîne vide que sur le réseau privé : `||` pour retomber sur l'IP publique.
+  const host = loadBalancer?.hostname || loadBalancer?.ip;
   if (!host) {
     throw new Error("L'instance PostgreSQL n'expose ni hostname ni ip sur son endpoint public");
   }
