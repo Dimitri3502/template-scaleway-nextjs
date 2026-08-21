@@ -47,7 +47,9 @@ pulumi config set cloudflareZoneId 0123456789abcdef0123456789abcdef
 pulumi config set --secret cloudflare:apiToken cf_xxxxxxxx
 ```
 
-`pulumi config set --secret` chiffre la valeur : `Pulumi.prod.yaml` peut être versionné.
+`pulumi config set --secret` chiffre la valeur, mais `Pulumi.prod.yaml` est ignoré par git :
+il appartient à un projet, pas au template. Gardez-le hors du dépôt et recopiez-le dans
+`infra/` après chaque clone — `Pulumi.prod.yaml.example` est le seul gabarit versionné.
 
 ## 3. Amorçage — en deux temps
 

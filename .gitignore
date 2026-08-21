@@ -15,3 +15,7 @@ dist/
 .DS_Store
 *.log
 coverage/
+
+# Configuration de stack Pulumi : propre à chaque projet, recopiée à la main dans le clone.
+# Le gabarit versionné reste Pulumi.prod.yaml.example.
+infra/Pulumi.*.yaml

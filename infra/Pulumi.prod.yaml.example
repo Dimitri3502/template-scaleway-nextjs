@@ -8,7 +8,9 @@
 #   pulumi config set adminCidr "$(curl -4 -s https://ifconfig.me)/32"
 #   pulumi config set --secret cloudflare:apiToken cf_xxx   # seulement avec un domaine custom
 #
-# `pulumi config set --secret` chiffre la valeur : le fichier peut être versionné tel quel.
+# `pulumi config set --secret` chiffre la valeur, mais `Pulumi.prod.yaml` reste hors dépôt :
+# il est propre à un projet, quand ce dépôt est un template que l'on clone. Seul ce gabarit
+# est versionné ; conservez votre fichier ailleurs et recopiez-le dans chaque clone.
 # Ne recopiez jamais un secret en clair ici.
 config:
   # Profil de ~/.config/scw/config.yaml. Il porte la clé API, l'organisation et le projet :
